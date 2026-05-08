@@ -13,6 +13,7 @@ from data_loader import (
     save_clean_group_constraints
 )
 
+from validation import validate_missing_teachers
 
 def run_teachers():
     availability = load_teacher_availability()
@@ -100,5 +101,47 @@ def run_all():
     return availability, time_slots, group_constraints, student_groups, courses
 
 
+def run_validations():
+    """
+    Runs data validation checks.
+    """
+
+    courses = load_courses()
+
+    print("\n==============================")
+    print("STARTING DATA VALIDATION")
+    print("==============================")
+
+    missing_teachers = validate_missing_teachers(courses)
+
+    print("\n==============================")
+    print("DATA VALIDATION FINISHED")
+    print("==============================")
+
+    return missing_teachers
+
 if __name__ == "__main__":
-    run_all()
+    # run_all()
+    run_validations()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
