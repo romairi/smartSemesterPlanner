@@ -2,21 +2,19 @@ from data_loader import (
     load_teacher_availability,
     load_student_groups,
     load_courses,
+    build_time_slots,
+    load_group_constraints,
     show_friendly_data,
     show_summary,
     save_clean_teachers,
+    save_clean_student_groups,
     save_clean_courses,
-    build_time_slots,
-    save_clean_time_slots
+    save_clean_time_slots,
+    save_clean_group_constraints
 )
 
 
 def run_teachers():
-    """
-    Reads Teachers.xlsx, shows teacher availability,
-    shows summary, and saves teachers_clean.xlsx
-    """
-
     availability = load_teacher_availability()
 
     print("\n--- CLEAN TEACHER AVAILABILITY ---")
@@ -32,47 +30,7 @@ def run_teachers():
     return availability
 
 
-def run_student_groups():
-    """
-    Reads StudentGroups.xlsx Sheet2
-    and shows student groups with their courses.
-    """
-
-    student_groups = load_student_groups()
-
-    print("\n--- STUDENT GROUPS COURSES ---")
-    show_friendly_data(student_groups, rows=150)
-
-    print("\nStudent groups step finished.")
-
-    return student_groups
-
-
-def run_courses():
-    """
-    Reads Courses.xlsx,
-    creates clean courses table,
-    and saves courses_clean.xlsx.
-    """
-
-    courses = load_courses()
-
-    print("\n--- CLEAN COURSES ---")
-    show_friendly_data(courses, rows=150)
-
-    save_clean_courses(courses)
-
-    print("\nCourses step finished.")
-
-    return courses
-
-
 def run_time_slots():
-    """
-    Creates official hourly time slots
-    and saves time_slots_clean.xlsx.
-    """
-
     time_slots = build_time_slots()
 
     print("\n--- TIME SLOTS ---")
@@ -85,17 +43,53 @@ def run_time_slots():
     return time_slots
 
 
-def run_all():
-    """
-    Runs all preparation steps.
-    """
+def run_group_constraints():
+    group_constraints = load_group_constraints()
 
+    print("\n--- GROUP CONSTRAINTS ---")
+    show_friendly_data(group_constraints, rows=50)
+
+    save_clean_group_constraints(group_constraints)
+
+    print("\nGroup constraints step finished.")
+
+    return group_constraints
+
+
+def run_student_groups():
+    student_groups = load_student_groups()
+
+    print("\n--- STUDENT GROUPS COURSES ---")
+    show_friendly_data(student_groups, rows=150)
+
+    save_clean_student_groups(student_groups)
+
+    print("\nStudent groups step finished.")
+
+    return student_groups
+
+
+def run_courses():
+    courses = load_courses()
+
+    print("\n--- CLEAN COURSES ---")
+    show_friendly_data(courses, rows=150)
+
+    save_clean_courses(courses)
+
+    print("\nCourses step finished.")
+
+    return courses
+
+
+def run_all():
     print("\n==============================")
     print("STARTING DATA PREPARATION")
     print("==============================")
 
     availability = run_teachers()
     time_slots = run_time_slots()
+    group_constraints = run_group_constraints()
     student_groups = run_student_groups()
     courses = run_courses()
 
@@ -103,9 +97,8 @@ def run_all():
     print("ALL STEPS FINISHED")
     print("==============================")
 
-    return availability, time_slots, student_groups, courses
+    return availability, time_slots, group_constraints, student_groups, courses
 
 
 if __name__ == "__main__":
-    # run_all()
-    run_time_slots()
+    run_all()

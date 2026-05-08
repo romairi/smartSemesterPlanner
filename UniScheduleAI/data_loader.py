@@ -93,7 +93,6 @@ def save_clean_teachers(availability):
     print(f"\nSaved clean file to: {output_file}")
 
 
-
 #########################################################################################
 
 
@@ -159,7 +158,7 @@ def load_student_groups():
     df = df[
         (df["student_group"] != "") &
         (df["course_name"] != "")
-    ]
+        ]
 
     # Add simple group_id
     df["group_id"] = df["student_group"].factorize()[0] + 1
@@ -180,6 +179,23 @@ def load_student_groups():
     ]
 
     return df
+
+
+def save_clean_student_groups(student_groups):
+    """
+    Saves clean student groups table.
+    """
+
+    output_file = DATA_DIR / "student_groups_clean.xlsx"
+
+    with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+        student_groups.to_excel(
+            writer,
+            sheet_name="StudentGroupsClean",
+            index=False
+        )
+
+    print(f"\nSaved clean student groups file to: {output_file}")
 
 ##############################################################################################################
 
@@ -333,14 +349,14 @@ def load_courses():
 
     # Add section number for duplicated courses inside same student group
     courses["section_number"] = (
-        courses
-        .groupby(["student_group", "course_name"])
-        .cumcount() + 1
+            courses
+            .groupby(["student_group", "course_name"])
+            .cumcount() + 1
     )
 
     # Technical unique id for every course section
     courses["course_instance_id"] = (
-        "CI" + (courses.index + 1).astype(str).str.zfill(4)
+            "CI" + (courses.index + 1).astype(str).str.zfill(4)
     )
 
     courses = courses[
@@ -447,4 +463,84 @@ def save_clean_time_slots(time_slots):
     print(f"\nSaved clean time slots file to: {output_file}")
 
 
+############################################################################################################
 
+def load_group_constraints():
+    """
+    Loads special constraints for student groups.
+
+    Expected columns in GroupConstraints.xlsx:
+    student_group, rule_type, start_time, allowed_days, notes
+    """
+
+    constraints_file = DATA_DIR / "GroupConstraints.xlsx"
+
+    df = pd.read_excel(
+        constraints_file,
+        sheet_name="GroupConstraints"
+    )
+
+    # Clean column names
+    df.columns = (
+        df.columns
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .str.replace(" ", "_")
+    )
+
+    required_columns = [
+        "student_group",
+        "rule_type",
+        "start_time",
+        "allowed_days"
+    ]
+
+    missing_columns = [
+        col for col in required_columns
+        if col not in df.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing columns in GroupConstraints.xlsx: {missing_columns}"
+        )
+
+    # Remove empty rows
+    df = df.dropna(how="all")
+
+    # Clean text columns
+    for col in ["student_group", "rule_type", "start_time", "allowed_days"]:
+        df[col] = df[col].astype(str).str.strip()
+
+    # notes is optional
+    if "notes" not in df.columns:
+        df["notes"] = ""
+
+    df["notes"] = df["notes"].astype(str).str.strip()
+
+    # Convert allowed_days from string into list-like clean text
+    # Example: "ראשון,שלישי,חמישי,שישי"
+    df["allowed_days"] = (
+        df["allowed_days"]
+        .str.replace(" ", "", regex=False)
+    )
+
+    return df
+
+
+def save_clean_group_constraints(group_constraints):
+    """
+    Saves clean group constraints table.
+    """
+
+    output_file = DATA_DIR / "group_constraints_clean.xlsx"
+
+    with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+        group_constraints.to_excel(
+            writer,
+            sheet_name="GroupConstraintsClean",
+            index=False
+        )
+
+    print(f"\nSaved clean group constraints file to: {output_file}")
